@@ -1,0 +1,174 @@
+<!-- Name: Shafeeq Amirudeen
+    Class: DISM/2B/24
+Admin No.:2223007 -->
+
+<!DOCTYPE html>
+<html lang="eng">
+	<head>
+		<title>SP Games</title>
+		<meta charset="UTF-8">
+		<meta name="description" content="SP Games">
+		<meta name="keywords" content="sp,games">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<!-- Favicon -->
+		<link href="img/favicon.ico" rel="shortcut icon"/>
+
+		<!-- Google Font -->
+		<link href="https://fonts.googleapis.com/css?family=Roboto:400,400i,500,500i,700,700i,900,900i" rel="stylesheet">
+
+
+		<!-- Stylesheets -->
+		<link rel="stylesheet" href="./css/bootstrap.min.css"/>
+		<link rel="stylesheet" href="./css/font-awesome.min.css"/>
+		<link rel="stylesheet" href="./css/slicknav.min.css"/>
+		<link rel="stylesheet" href="./css/owl.carousel.min.css"/>
+		<link rel="stylesheet" href="./css/magnific-popup.css"/>
+		<link rel="stylesheet" href="./css/animate.css"/>
+		<!-- Main Stylesheets -->
+		<link rel="stylesheet" href="./css/style.css"/>
+		<link rel="stylesheet" href="./css/login.css"/>
+		
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>	
+	</head>  
+	<script>
+		$(document).ready(function() {
+			
+
+			function login(type) {
+				var email = $('#email').val();
+				var pwd = $('#pwd').val();
+
+				var data = `{"email":"${email}", "password":"${pwd}"}`;
+				$.ajax({
+					url: "http://localhost:8080/users/login",
+					type: "POST",
+					data: data,
+					contentType: "application/json",
+					dataType: "json",
+					success: function(data, textStatus, xhr) {
+						var token = data.token;
+						var userArr = JSON.parse(data.UserData);
+						var user = userArr[0];
+
+						localStorage.setItem("token", token);
+						localStorage.setItem("user", JSON.stringify(user));
+
+						// Check if the user is an admin based on the "type" column
+						if (user.type === "Admin") {
+							// If the user is an admin, redirect to the admin.html page
+							console.log("Redirecting to admin.html")
+							window.location.href = "admin.html";
+						} else {
+							// If the user is a customer, redirect to the index-login.html page
+							console.log("Redirecting to index-login.html")
+							window.location.href = "index-login.html";
+						}
+					},
+					error: function(xhr, textStatus, err) {
+						if (xhr.status === 401) {
+							var errorMessage = xhr.responseJSON.message;
+							$('#error-message').text(errorMessage).show();
+						} else {
+							console.log(err);
+						}
+					},
+				});
+			}
+			// Click event for "Login as customer" button
+			$('#loginAsCustomer').click(function() {
+				// Call the login function with type = "Customer"
+				login("Customer");
+			});
+
+			// Click event for "Login as admin" button
+			$('#loginAsAdmin').click(function() {
+				// Call the login function with type = "Admin"
+				login("Admin");
+			});
+ 		});
+
+
+		// $(document).ready(function(){
+		// 	$('#Login').click(function(){
+
+		// 		var email = $('#email').val();
+		// 		var pwd = $('#pwd').val();
+
+		// 		// alert(email + " " + pwd);
+				
+		// 		var data = 	`{"email":"${email}", "password":"${pwd}"}`;
+		// 		$.ajax(
+		// 			{
+		// 				url:"http://localhost:8080/users/login",
+		// 				type:"POST",
+		// 				data:data,
+		// 				contentType:"application/json",
+		// 				dataType:"json",
+		// 				success(data,textStatus,xhr){
+		// 					console.log(data);//Data contains the json response from the server webservice
+
+		// 					var token = data.token;
+		// 					var userArr = JSON.parse(data.UserData);
+		// 					var user = userArr[0];
+
+		// 					localStorage.setItem("token",token);
+		// 					localStorage.setItem("user",JSON.stringify(user));
+
+		// 					window.location.href="index-login.html";
+		// 				},
+		// 				error(xhr,textStatus,err){
+		// 					if(xhr.status === 401) {
+		// 						var errorMessage = xhr.responseJSON.message;
+		// 						$('#error-message').text(errorMessage).show();
+		// 					}
+		// 					else{
+		// 						console.log(err);
+		// 					}
+		// 				}
+		// 			}
+		// 		);
+		// 		return false;
+		// 	});
+		// });
+	</script>
+	<body>  
+		<!-- Page Preloder -->
+		<div id="preloder">
+			<div class="loader"></div>
+		</div>
+
+		<div class="login-form">
+			<form action=""> 
+				<h2 class="text-center">Log in</h2>       
+				<div class="form-group">
+					<input type="text" class="form-control" id="email" placeholder="Email" required="required">
+				</div>
+				<div class="form-group">
+					<input type="password" class="form-control" id="pwd" placeholder="Password" required="required">
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-block" id="loginAsCustomer">Login as Customer</button>
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-block" id="loginAsAdmin">Login as Admin</button>
+				</div>
+				<div class="clearfix">
+					<label class="pull-left checkbox-inline"><input type="checkbox"> Remember me</label>
+					<a href="#" class="pull-right">Forgot Password?</a>
+				</div>
+				<div id="error-message" class="error-message"></div>
+			</form> 
+		</div>
+
+		<!--====== Javascripts & Jquery ======-->
+		<script src="./js/jquery-3.2.1.min.js"></script>
+		<script src="./js/bootstrap.min.js"></script>
+		<script src="./js/jquery.slicknav.min.js"></script>
+		<script src="./js/owl.carousel.min.js"></script>
+		<script src="./js/jquery.sticky-sidebar.min.js"></script>
+		<script src="./js/jquery.magnific-popup.min.js"></script>
+		<script src="./js/main.js"></script>
+	</body>  
+</html>

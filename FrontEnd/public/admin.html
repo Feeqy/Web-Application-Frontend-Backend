@@ -1,0 +1,365 @@
+<!-- Name: Shafeeq Amirudeen
+    Class: DISM/2B/24
+Admin No.:2223007 -->
+
+
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <title>SP Games Admin</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="SP Games">
+	<meta name="keywords" content="sp,games">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="./css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="./css/slicknav.min.css"/>
+    <link rel="stylesheet" href="./css/owl.carousel.min.css"/>
+    <link rel="stylesheet" href="./css/magnific-popup.css"/>
+    <link rel="stylesheet" href="./css/animate.css"/>
+    <!-- Main Stylesheets -->
+    <link rel="stylesheet" href="./css/style.css"/>
+    <link rel="stylesheet" href="./css/admin.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+</head>
+<script>
+    $(document).ready(function () {
+
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+        // Function to populate the category dropdown with existing categories
+        function populateCategoryDropdown(categories) {
+            var dropdown = $('#category');
+            dropdown.empty();
+            dropdown.append($('<option>').val('').text('Select a category').prop('disabled', true));
+            categories.forEach(function (category) {
+                dropdown.append($('<option>').val(category.cat_name).text(category.cat_name).data('categoryid',category.cat_id));
+            });
+        }
+        // Fetch the list of existing categories from the backend API
+        $.ajax({
+            url: "http://localhost:8080/categories",
+            type: "GET",
+            dataType: "json",
+            success: function (categories) {
+                // Populate the category dropdown with existing categories
+                populateCategoryDropdown(categories);
+
+            },
+            error: function (error) {
+                console.error("Error fetching categories:", error);
+                // Handle the error, e.g., display an error message to the user
+            },
+        });
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+    // Function to populate the delete game dropdown with existing game names
+    function populateGameDropdown(games) {
+        var dropdown = $('#gameToDelete');
+        dropdown.empty();
+        dropdown.append($('<option>').val('').text('Select a game to delete').prop('disabled', true));
+        games.forEach(function (game) {
+            dropdown.append($('<option>').val(game.gameid).text(game.game_title));
+        });
+    }
+    // Fetch the list of existing games from the backend API
+    $.ajax({
+            url: "http://localhost:8080/allGames",
+            type: "GET",
+            dataType: "json",
+            success: function (games) {
+                // Populate the game dropdown with existing games
+                console.log(games)
+                populateGameDropdown(games);
+            },
+            error: function (error) {
+                console.error("Error fetching games:", error);
+                // Handle the error, e.g., display an error message to the user
+            },
+        });
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------------//
+        // Function to populate the platform dropdown with existing platforms
+        function populatePlatformOptions(platforms) {
+            var dropdown = $('#platform');
+            dropdown.empty();
+            dropdown.append($('<option>').val('').text('Select a platform').prop('disabled', true));
+            platforms.forEach(function (platform) {
+                dropdown.append($('<option>').val(platform.platform_name).text(platform.platform_name).data('platformid',platform.plat_id));
+            });
+        }
+
+        $.ajax({
+            url: "http://localhost:8080/platforms",
+            type: "GET",
+            dataType: "json",
+            success: function (platforms) {
+                // Populate the platform dropdown with existing platforms
+                console.log(platforms);
+                populatePlatformOptions(platforms);
+            },
+            error: function (error) {
+                console.error("Error fetching platforms:", error);
+                // Handle the error, e.g., display an error message to the user
+            },
+        });
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+        // Submit game form
+        $('#addGameForm').submit(function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Get the form data
+            var gameImage = $('#gameImage').val();
+            var gameTitle = $('#gameTitle').val();
+            var gameDescription = $('#gameDescription').val();
+            var prices = $('#gamePrice').val().split(',').map(parseFloat);
+            var categoryNames = $('#category').val();
+            var platformNames = $('#platform').val()
+            var year = $('#year').val();
+
+            console.log("Platform names: " + platformNames);
+
+            // Map selected platform names to their corresponding platform IDs
+            var platformIds = platformNames.map(function (platformName) {
+                var option = $('#platform option[value="' + platformName + '"]');
+                return option.data('platformid');
+            });
+
+            
+            console.log('Mapped Platform IDs:', platformIds);
+            
+            // Map selected platform names to their corresponding platform IDs
+            var categoryIds = categoryNames.map(function (categoryName) {
+                var option = $('#category option[value="' + categoryName + '"]');
+                return option.data('categoryid');
+            });
+
+            // Create the data object to be sent in the AJAX request
+            var data = {
+                game_image: gameImage,
+                game_title: gameTitle,
+                game_description: gameDescription,
+                year: year,
+                plat_id: platformIds.join(','),
+                price: prices.join(','),
+                cat_id: categoryIds.join(','),
+            };
+            var token = localStorage.getItem("token")
+            // Send the data to the backend endpoint using AJAX
+            $.ajax({
+                url: "http://localhost:8080/game",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                headers: {
+                    "Authorization" : "Bearer " + token
+                },
+                success: function (response) {
+                    // Handle the response from the server, e.g., display a success message
+                    console.log("Game added successfully:", response);
+                    $("#gameSuccessMessage").show();
+                    setTimeout(function (){
+                        location.reload();
+                    },2000);
+                },
+                error: function (error) {
+                    console.error("Error adding game:", error);
+                    if(error.responseJSON && error.responseJSON.Message === "The game provided already exists.") {
+                        $("#gameDuplicateErrorMessage").show();
+                    }
+                },
+            });
+        });
+
+
+        $('#addPlatformForm').submit(function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Get the form data
+            var platformName = $('#platformName').val();
+            var platformDescription = $('#platformDescription').val();
+
+            // Create the data object to be sent in the AJAX request
+            var data = {
+                platform_name: platformName,
+                platform_description: platformDescription,
+            };
+
+            var token = localStorage.getItem("token");
+
+            // Send the data to the backend endpoint using AJAX
+            $.ajax({
+                url: "http://localhost:8080/platform",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                headers: {
+                    "Authorization" : "Bearer " + token
+                },
+                success: function (response) {
+                    // Handle the response from the server, e.g., display a success message
+                    console.log("Platform added successfully:", response);
+                    $("#platformSuccessMessage").show();
+                    setTimeout(function (){
+                        location.reload();
+                    },2000);
+                },
+                error: function (error) {
+                    console.error("Error adding platform:", error);
+                    if(error.responseJSON && error.responseJSON.Message === "The platform provided already exists.") {
+                        $("#platformDuplicateErrorMessage").show();
+                    }
+                },
+            });
+        });
+
+        // Delete game form submission
+        $('#deleteGameForm').submit(function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Get the selected game ID from the dropdown
+            var gameIdToDelete = $('#gameToDelete').val();
+            console.log(gameIdToDelete);
+            // Send the delete request to the backend endpoint using AJAX
+            $.ajax({
+                url: "http://localhost:8080/game/" + gameIdToDelete,
+                type: "DELETE",
+                dataType: "json",
+                success: function (response) {
+                    // Handle the response from the server, e.g., display a success message
+                    console.log("Game deleted successfully:", response);
+                    $("#deleteGameSuccessMessage").show();
+                    setTimeout(function () {
+                        location.reload();
+                    }, 2000);
+                },
+                error: function (error) {
+                    console.error("Error deleting game:", error);
+                    $("#deleteGameErrorMessage").show();
+                },
+            });
+        });
+
+
+
+        $('#logout').click(function(){
+            // Clear any stored user data or token
+            localStorage.clear()
+            //Redirect to the login page
+            window.location.href = "index.html";
+        });
+    });
+</script>
+
+
+<body>
+    <!-- Page Preloder -->  
+    <div id="preloder">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Header section -->
+    <header class="header-section">
+        <div class="header-warp">
+            <div class="header-social d-flex justify-content-end">
+                <button id="logout">Logout</button>
+            </div>
+        </div>
+    </header>
+	<!-- Header section end -->
+
+    <!-- Add Game Card -->
+    <div class="container">
+        <div class="cards-container">
+            <div class="card">
+                <h3>Add New Game</h3>
+                <form id="addGameForm">
+                    <!-- Add form fields to input new game details -->
+                    <label for="gameImage">Game Image URL:</label>
+                    <input type="text" id="gameImage" placeholder="Enter Game Image URL" required>
+
+                    <label for="gameTitle">Game Title:</label>
+                    <input type="text" id="gameTitle" placeholder="Enter Game Title" required>
+    
+                    <label for="gameDescription">Game Description:</label>
+                    <textarea type="text" id="gameDescription" placeholder="Enter Game Description" required></textarea>
+    
+                    <label for="gamePrice">Game Price:</label>
+                    <input type="text" id="gamePrice" placeholder="Enter Price(s)" required>
+
+                    <label for="category">Game Category:</label>
+                    <select id="category" class="form-control" name="categoryname" multiple required >
+                        <!-- Dynamically generated options from the database will be added here -->
+                    </select>
+
+                    <label for="platform">Game Platform:</label>
+                    <select name="platform" id="platform" class="form-control"  multiple required>
+                        <!-- Dynamically generated options from the database will be added here -->
+                    </select>
+
+                    <label for="year">Year:</label>
+                    <input type="text" id="year" placeholder="Enter Year">
+
+                    <div id="gameSuccessMessage" style="display: none;">Game added successfully!</div>
+
+                    <div id="gameDuplicateErrorMessage" style="display: none;">Game already exists!</div>
+
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+        
+            <!-- Add Platform Card -->
+            <div class="card">
+                <div class="add-platform-section" >
+                    <h3>Add New Platform</h3>
+                    <form id="addPlatformForm">
+                        <!-- Add form fields to input new platform details -->
+                        <label for="platformName">Platform Name:</label>
+                        <input type="text" id="platformName" placeholder="Enter Platform Name" required>
+
+                        <label for="platformDescription">Platform Description:</label>
+                        <textarea type="text" id="platformDescription" placeholder="Enter Platform Descripton" required></textarea>
+                        
+                        <div id="platformSuccessMessage" style="display: none;">Platform added successfully!</div>
+
+                        <div id="platformDuplicateErrorMessage" style="display: none;">Platform already exists!</div>
+
+                        <button type="submit">Submit</button>
+                    </form>
+                </div>
+                
+                <div class="delete-game-section" style="margin-top: 100px;">
+                    <h3>Delete Game</h3>
+                        <form id="deleteGameForm">
+                            <label for="gameToDelete">Select Game to Delete:</label>
+                            <select id="gameToDelete" class="form-control" name="gameToDelete" required>
+                                <!-- Dynamically generated options from the database will be added here -->
+                            </select>
+                    
+                            <div id="deleteGameSuccessMessage" style="display: none;">Game deleted successfully!</div>
+                            <div id="deleteGameErrorMessage" style="display: none;">Error deleting game!</div>
+                    
+                            <button type="submit">Delete</button>
+                        </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+
+    <!--====== Javascripts & Jquery ======-->
+    <script src="./js/jquery-3.2.1.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/jquery.slicknav.min.js"></script>
+    <script src="./js/owl.carousel.min.js"></script>
+    <script src="./js/jquery.sticky-sidebar.min.js"></script>
+    <script src="./js/jquery.magnific-popup.min.js"></script>
+    <script src="./js/main.js"></script>
+</body>
+</html>

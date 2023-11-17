@@ -1,0 +1,350 @@
+<!-- Name: Shafeeq Amirudeen
+    Class: DISM/2B/24
+Admin No.:2223007 -->
+
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+	<title>SP Games</title>
+	<meta charset="UTF-8">
+	<meta name="description" content="SP Games">
+	<meta name="keywords" content="sp,games">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Favicon -->
+	<link href="img/favicon.ico" rel="shortcut icon"/>
+
+	<!-- Google Font -->
+	<link href="https://fonts.googleapis.com/css?family=Roboto:400,400i,500,500i,700,700i,900,900i" rel="stylesheet">
+
+
+	<!-- Stylesheets -->
+	<link rel="stylesheet" href="./css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="./css/font-awesome.min.css"/>
+	<link rel="stylesheet" href="./css/slicknav.min.css"/>
+	<link rel="stylesheet" href="./css/owl.carousel.min.css"/>
+	<link rel="stylesheet" href="./css/magnific-popup.css"/>
+	<link rel="stylesheet" href="./css/animate.css"/>
+
+	<!-- Main Stylesheets -->
+	<link rel="stylesheet" href="./css/style.css"/>
+
+
+	<!--[if lt IE 9]>
+		  <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+	  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	<![endif]-->
+
+</head>
+<script>
+
+	function showLoginMessage() {
+		alert("Please log in to access the Reviews.");
+	}
+	
+
+	function getGameReviews(gameId, callback) {
+		$.ajax({
+			url: "http://localhost:8080/game/" + gameId + "/review",
+			type: "GET",
+			dataType: "json",
+			success: function (data) {
+				// Data contains the reviews fetched from the server
+				callback(null, data);
+			},
+			error: function (error) {
+				callback(error, null);
+			},
+		});
+	}
+
+
+	function showGameDetails(gameDetails) {
+		var gameDetailsContainer = document.querySelector('.game-details-card');
+		gameDetailsContainer.style.display = "block";
+		
+		// Access the elements in the games.html page to display the game details
+		var gameImageElement = document.getElementById('gameImage');
+		var titleElement = document.getElementById('gameTitle');
+		var platformElement = document.getElementById('gamePlatform');
+		var categoryElement = document.getElementById('gameCategory');
+		var yearElement = document.getElementById('gameYear');
+		var descriptionElement = document.getElementById('gameDescription');
+		var priceElement = document.getElementById('gamePrice');
+		var reviewElement = document.getElementById('gameReviews');
+
+		// Update the elements with the game details
+		gameImageElement.src = "http://localhost:8080/images/" + gameDetails.game_image;
+		titleElement.textContent = 'Title: ' + gameDetails.game_title;
+		platformElement.textContent = 'Platform: ' + gameDetails.platform_name;
+		categoryElement.textContent = 'Category: ' + gameDetails.cat_name;
+		yearElement.textContent = 'Published Year: ' + gameDetails.year;
+		descriptionElement.innerHTML = 'Description: ' + gameDetails.game_description;
+		priceElement.textContent = 'Price:$' + gameDetails.price;
+		
+
+		// Call the getGameReviews function to fetch the reviews
+		getGameReviews(gameDetails.gameid, function(err, reviews) {
+			if (err) {
+				console.log("Error fetching reviews:", err);
+				return;
+			}
+
+			var reviewsContainer = document.getElementById("gameReviews");
+
+			// Clear the existing reviews
+			reviewsContainer.innerHTML = "";
+
+			var reviewsHeaderElement = document.createElement('h4');
+			reviewsHeaderElement.textContent = "Reviews:";
+			reviewsContainer.appendChild(reviewsHeaderElement);
+
+			// Iterate over the reviews and create elements to display them
+			for (var i = 0; i < reviews.length; i++) {
+				var review = reviews[i];
+
+				var reviewElement = document.createElement("div");
+				reviewElement.classList.add("review");
+
+				var usernameElement = document.createElement("p");
+				usernameElement.textContent = "Username:" + review.username;
+				reviewElement.appendChild(usernameElement);
+
+				var ratingElement = document.createElement("p");
+				ratingElement.textContent = "Rating:" + review.rating;
+				reviewElement.appendChild(ratingElement);
+
+				var contentElement = document.createElement("p");
+				contentElement.textContent = "Content:" + review.content;
+				reviewElement.appendChild(contentElement);
+
+				var dateElement = document.createElement("p");
+				dateElement.textContent = "Date:" + review.created_at;
+				reviewElement.appendChild(dateElement);
+
+				// Append the review element to the reviews container
+				reviewsContainer.appendChild(reviewElement);
+			}
+		});
+
+		var gameDetailsContainer = document.getElementById('gameDetails');
+		gameDetailsContainer.scrollIntoView({behavior: 'smooth'});
+	}
+
+
+</script>
+<body>
+	<!-- Page Preloder -->
+	<div id="preloder">
+		<div class="loader"></div>
+	</div>
+
+	<!-- Header section -->
+	<header class="header-section">
+		<div class="header-warp">
+			<div class="header-social d-flex justify-content-end">
+				<p>Follow us:</p>
+				<a href="#"><i class="fa fa-pinterest"></i></a>
+				<a href="#"><i class="fa fa-facebook"></i></a>
+				<a href="#"><i class="fa fa-twitter"></i></a>
+			</div>
+			<div class="header-bar-warp d-flex">
+				<!-- site logo -->
+				<a href="index.html" class="site-logo">
+					<img src="./img/SP Logo.png" alt="">
+				</a>
+				<nav class="top-nav-area w-100">
+					<div class="user-panel">
+						<a href="login.html" id="login">Login</a>
+					</div>
+					<!-- Menu -->
+					<ul class="main-menu primary-menu">
+						<li><a href="index.html">Home</a></li>
+						<li><a href="games.html">Games</a></li>
+						<li><a href="#" onclick="showLoginMessage()">Reviews</a></li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</header>
+	<!-- Header section end -->
+
+
+	<!-- Page top section -->
+	<section class="page-top-section set-bg" data-setbg="img/page-top-bg/1.jpg">
+		<div class="page-info">
+			<h2>Games</h2>
+			<div class="site-breadcrumb">
+				<a href="index.html">Home</a>  /
+				<span>Games</span>
+			</div>
+		</div>
+	</section>
+	<!-- Page top end-->
+
+	<!-- Game container -->
+	<div id="gameContainer" class="game-container">
+		<div class="game-grid">
+			<script>
+				// Retrieve the search type from localStorage
+				var searchType = localStorage.getItem('searchType');
+				if (searchType === 'title') {
+					// Retrieve the game title data from localStorage
+					var gameTitleData = localStorage.getItem('gameTitleData');
+
+					// Parse the JSON data
+					var gamesTitle = JSON.parse(gameTitleData);
+
+					for (var i = 0; i < gamesTitle.length; i++) {
+						var game = gamesTitle[i];
+
+						// Create a <div> element for each game
+						var gameCard = document.createElement('div');
+						gameCard.classList.add('game-card');
+
+						var gameImageElement = document.createElement('img');
+						gameImageElement.classList.add('game-image');
+						gameImageElement.src = "http://localhost:8080/images/" + game.game_image;
+						gameCard.appendChild(gameImageElement);
+
+
+						// Create <h3> element for game title
+						var titleElement = document.createElement('h3');
+						titleElement.textContent = game.game_title;
+						gameCard.appendChild(titleElement);
+
+						(function(game) {
+							titleElement.addEventListener('click',function(){
+								showGameDetails(game);
+							});
+						})(game);
+
+						// Create <p> element for game price
+						var priceElement = document.createElement('p');
+						priceElement.textContent = 'Price: $' + game.price;
+						gameCard.appendChild(priceElement);
+
+						var platformElement = document.createElement('p');
+						platformElement.textContent = 'Platform: ' + game.platform_name;
+						gameCard.appendChild(platformElement);
+
+						// Append the game <div> to the game container
+						var gameGridContainer = document.querySelector('.game-grid');
+						gameGridContainer.appendChild(gameCard);
+
+						
+					}
+				} 
+				else if (searchType === 'platform') {
+					// Retrieve the game platform data from localStorage
+					var gamePlatformData = localStorage.getItem('gamePlatformData');
+
+					// Parse the JSON data
+					var gamesPlatform = JSON.parse(gamePlatformData);
+
+					for (var i = 0; i < gamesPlatform.length; i++) {
+						var game = gamesPlatform[i];
+
+
+						// Create a <div> element for each game
+						var gameCard = document.createElement('div');
+						gameCard.classList.add('game-card');
+
+						// Create an <img> element for the game image
+						var gameImageElement = document.createElement('img');
+						gameImageElement.classList.add('game-image');
+						gameImageElement.src = "http://localhost:8080/images/" + game.game_image;
+						gameCard.appendChild(gameImageElement);
+							
+						// Create <h3> element for game title
+						var titleElement = document.createElement('h3');
+						titleElement.textContent = game.game_title;
+						gameCard.appendChild(titleElement);
+
+						(function(game) {
+							titleElement.addEventListener('click',function(){
+								showGameDetails(game);
+							});
+						})(game);
+						
+						// Create <p> element for game price
+						var priceElement = document.createElement('p');
+						priceElement.textContent = 'Price: $' + game.price;
+						gameCard.appendChild(priceElement);
+
+						var platformElement = document.createElement('p');
+						platformElement.textContent = 'Platform: ' + game.platform_name;
+						gameCard.appendChild(platformElement);
+
+
+						// Append the game <div> to the game container
+						var gameGridContainer = document.querySelector('.game-grid');
+						gameGridContainer.appendChild(gameCard);
+					}
+				}
+			</script>
+		</div>
+	</div>
+
+	<!-- Games Details -->
+	<div class="game-details-card" style="display: none;">
+		<div id="gameDetails" class="game-details">
+			<img id="gameImage" class="game-image" src="">
+			<h4 id="gameTitle"></h4>
+			<p id="gamePlatform"></p>
+			<p id="gameCategory"></p>
+			<p id="gameYear"></p>
+			<p id="gameDescription"></p>
+			<p id="gamePrice"></p>
+			<p id="gameReviews"></p>
+		</div>
+	</div>
+	
+	<!-- Games Details End-->
+
+
+	<!-- Newsletter section -->
+	<section class="newsletter-section">
+		<div class="container">
+			<h2>Subscribe to our newsletter</h2>
+			<form class="newsletter-form">
+				<input type="text" placeholder="ENTER YOUR E-MAIL">
+				<button class="site-btn">subscribe  <img src="img/icons/double-arrow.png" alt="#"/></button>
+			</form>
+		</div>
+	</section>
+	<!-- Newsletter section end -->
+
+
+	<!-- Footer section -->
+	<footer class="footer-section">
+		<div class="container">
+			<a href="#" class="footer-logo">
+				<img src="./img/logo.png" alt="">
+			</a>
+			<ul class="main-menu footer-menu">
+				<li><a href="">Home</a></li>
+				<li><a href="">Games</a></li>
+			</ul>
+			<div class="footer-social d-flex justify-content-center">
+				<a href="#"><i class="fa fa-pinterest"></i></a>
+				<a href="#"><i class="fa fa-facebook"></i></a>
+				<a href="#"><i class="fa fa-twitter"></i></a>
+			</div>
+			<div class="copyright"><a href="">SP Games</a> 2023 @ All rights reserved</div>
+		</div>
+	</footer>
+	<!-- Footer section end -->
+
+
+	<!--====== Javascripts & Jquery ======-->
+	<script src="js/jquery-3.2.1.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/jquery.slicknav.min.js"></script>
+	<script src="js/owl.carousel.min.js"></script>
+	<script src="js/jquery.sticky-sidebar.min.js"></script>
+	<script src="js/jquery.magnific-popup.min.js"></script>
+	<script src="js/main.js"></script>
+	<script src="/ExpressServer/model/review.js"></script>
+
+	</body>
+</html>
